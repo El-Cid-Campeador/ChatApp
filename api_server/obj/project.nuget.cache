@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "dgSpecHash": "QJ1pJaIdMxzP+0owLtS+GNRmb+JjnNADdtyFNabh/GJbSdE3Wl9ymZ6+YswHW+fgAH+59vsX9UdzXElHWkRlMA==",
+  "success": true,
+  "projectFilePath": "/home/andreas/VSCode/0x0004/api_server/api_server.csproj",
+  "expectedPackageFiles": [
+    "/home/andreas/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
+    "/home/andreas/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "/home/andreas/.nuget/packages/microsoft.extensions.logging.abstractions/6.0.0/microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
+    "/home/andreas/.nuget/packages/microsoft.openapi/1.2.3/microsoft.openapi.1.2.3.nupkg.sha512",
+    "/home/andreas/.nuget/packages/npgsql/7.0.4/npgsql.7.0.4.nupkg.sha512",
+    "/home/andreas/.nuget/packages/swashbuckle.aspnetcore/6.5.0/swashbuckle.aspnetcore.6.5.0.nupkg.sha512",
+    "/home/andreas/.nuget/packages/swashbuckle.aspnetcore.swagger/6.5.0/swashbuckle.aspnetcore.swagger.6.5.0.nupkg.sha512",
+    "/home/andreas/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.5.0/swashbuckle.aspnetcore.swaggergen.6.5.0.nupkg.sha512",
+    "/home/andreas/.nuget/packages/swashbuckle.aspnetcore.swaggerui/6.5.0/swashbuckle.aspnetcore.swaggerui.6.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
