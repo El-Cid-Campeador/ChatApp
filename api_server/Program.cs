@@ -21,8 +21,6 @@ builder.Services.AddAuthentication(options => {
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.None;
         options.Cookie.HttpOnly = true;
-        // options.ExpireTimeSpan = new TimeSpan(0, 20, 0);
-        // options.Cookie.MaxAge = options.ExpireTimeSpan;
 
         options.Events = new CookieAuthenticationEvents {                          
             OnRedirectToLogin = redirectContext => {

@@ -23,7 +23,7 @@ namespace ApiServer.Controllers {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
+        
         [HttpGet("api/messages/{roomId}")]
         public async Task<IActionResult> GetMessages(string roomId) {
             try {
@@ -35,13 +35,13 @@ namespace ApiServer.Controllers {
 
         [HttpPost("api/messages/{roomId}")]
         public async Task<IActionResult> PostMessage(string roomId, Message message) {
-            //  try {
+            try {
                await _chatService.PostMessage(roomId, message);
 
                 return Ok();
-            // } catch (Exception ex) {
-            //     return StatusCode(500, $"Internal server error: {ex.Message}");
-            // }
+            } catch (Exception ex) {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }

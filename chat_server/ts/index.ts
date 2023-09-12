@@ -2,10 +2,17 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
+import { createClient } from 'redis';
 
 const PORT = 9000;
 
 const allowedDomains = ['http://localhost:5173'];
+
+let ID = '';
+
+const redisClient = createClient();
+
+await redisClient.connect();
 
 const app = express();
 
@@ -53,41 +60,51 @@ const io = new Server(httpServer, {
     }
 });
 
-io.use((socket, next) => {
-    const id = socket.handshake.auth.id;
+async function getOnlineUsers() {
+    const users = await redisClient.sMembers(`connectedUsers`);
 
-    if (!id) {
-        return next(new Error("invalid id"));
+    const res = users.map((user) => JSON.parse(user));
+
+    return res;
+}
+
+io.use((socket, next) => {
+    ID = socket.handshake.auth.id;
+
+    if (!ID) {
+        return next(new Error("Not authorized!"));
     }
 
     next();
 });
 
-let onlineUsers: any[] = [];
-
 io.on('connection', (socket) => {
-    socket.on("new-user-add", (newUserId) => {
-        if (!onlineUsers.includes((user: any) => user.id === newUserId)) {
-            onlineUsers.push({ id: newUserId, socketId: socket.id });
-        }
-        
-        io.emit("get-users", onlineUsers);
+    const id = JSON.stringify({ id: ID });
+
+    socket.setMaxListeners(0);
+
+    socket.on('join', async (userId) => {
+        await redisClient.sAdd(`connectedUsers`, userId);
+
+        const users = await getOnlineUsers();
+
+        io.emit('getAllUsers', users);
     });
 
-    socket.on("disconnect", () => {
-        onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-
-        io.emit("get-users", onlineUsers);
-    });
-      
-    socket.on('createRoom', room => {
+    socket.on('joinRoom', (room) => {
         socket.join(room);
-
-        socket.on('messageFromClient', msg => {
-            // const data = { user: socket.handshake.auth.username, msg };
+    });
     
-            socket.to(room).emit('messageFromServer', msg);
-        });
+    socket.on('from', (data) => {
+        socket.to(data.roomId).emit('to', data.msg);
+    });
+
+    socket.on('disconnect', async () => {
+        await redisClient.sRem(`connectedUsers`, id);
+
+        const users = await getOnlineUsers();
+        
+        io.emit('getAllUsers', users);
     });
 });
 

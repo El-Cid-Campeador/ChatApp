@@ -5,14 +5,15 @@
                 Loading...
             </h1>
             <div v-else >
-                <!-- <ul v-if="errorMsg !== ''"> -->
-                <ul>
-                    <li v-for="msg, i in msgList" :key="msg.id" :class="$style.msg">
-                        {{ msg.content }} {{ msg.senderId }} {{ msg.date }}
-                        <p v-if="i === msgList.length - 1 && isSending">Sending...</p>
-                    </li>
+                <ul v-if="errorMsg !== ''">
+                    <template v-for="msg, i in msgList" :key="msg.id" >
+                        <li :class="$style.msg">
+                            {{ msg.content }} {{ msg.senderId }} {{ msg.date }}
+                            <p v-if="i === msgList.length - 1 && isSending">Sending...</p>
+                        </li>
+                    </template>
                 </ul>
-                <!-- <h2 v-else>{{ errorMsg }}</h2> -->
+                <h2 v-else>{{ errorMsg }}</h2>
             </div>
         </div>
 
@@ -20,18 +21,17 @@
             <input type="text" v-model="inputMsg" />
         </form>
     </div>
-
 </template>
 
 <script setup lang="ts">
-    import { inject, onMounted, ref } from 'vue';
+    import { inject, onBeforeMount, onMounted, ref } from 'vue';
     import { useRoute } from 'vue-router';
     import axios from 'axios';
     import { Socket } from 'socket.io-client';
 
     const route = useRoute();
 
-    const id = route.params.id;
+    const roomId = ref(route.params.id);
 
     const isSending = ref(false);
     const inputMsg = ref('');
@@ -46,7 +46,7 @@
         isLoading.value = true;
 
         try {
-            const { data } = await axios.get(`http://localhost:5057/api/messages/${id}`, {
+            const { data } = await axios.get(`http://localhost:5057/api/messages/${roomId.value}`, {
                 withCredentials: true
             });
 
@@ -73,11 +73,11 @@
 
             msgList.value.push({ ...payload });
 
-            await axios.post(`http://localhost:5057/api/messages/${id}`, payload, {
+            await axios.post(`http://localhost:5057/api/messages/${roomId.value}`, payload, {
                 withCredentials: true
             });
     
-            socket!.emit('messageFromClient', JSON.stringify(payload));
+            socket!.emit('from', { msg: payload, roomId: roomId.value });
     
             inputMsg.value = '';
 
@@ -89,14 +89,16 @@
         }
     }
 
-    socket!.on('messageFromServer', (msg: any) => {
-        msgList.value.push(JSON.parse(msg));
+    socket!.on('to', (msg: any) => {
+        msgList.value.push(msg);
     });
 
-    onMounted(async () => {
+    onBeforeMount(async () => {
         await getMsgs();
+    });
 
-        socket!.emit('createRoom', `room${id}`);
+    onMounted(async () => {       
+        socket!.emit('joinRoom', `${roomId.value}`);
     });
 </script>
 

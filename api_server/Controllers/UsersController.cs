@@ -42,7 +42,7 @@ namespace ApiServer.Controllers {
 
                 await Request.HttpContext.SignInAsync("Cookies", claimsPrincipal,  new AuthenticationProperties {
                     IsPersistent = true,
-                    ExpiresUtc = DateTime.UtcNow.AddMinutes(20)
+                    ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
                 });
 
                 return Ok(new LoggedInUserInfo { Id= res.Id, Username = res!.Username });
@@ -54,7 +54,7 @@ namespace ApiServer.Controllers {
         [Authorize]
         [HttpDelete("/api/logout")]
         public async Task<IActionResult> Logout() {
-             try {
+            try {
                 await HttpContext.SignOutAsync();
 
                 return Ok();

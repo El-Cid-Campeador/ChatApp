@@ -14,7 +14,7 @@ namespace ApiServer.Repositories {
             await connection.OpenAsync();
 
             using var command = new NpgsqlCommand(
-                "SELECT c0.roomId FROM chats AS c0, chats as c1 WHERE c0.userId = @id0::uuid AND c1.userId = @id1::uuid"
+                "SELECT roomId FROM chats WHERE userId = @id0::uuid AND roomId IN (SELECT roomId FROM chats WHERE userId = @id1::uuid);"
                 , connection
             );
             command.Parameters.AddWithValue("@id0", userId0);
