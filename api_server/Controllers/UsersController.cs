@@ -35,6 +35,9 @@ namespace ApiServer.Controllers {
                 var claimsIdentity = new ClaimsIdentity(new[] {
                     new Claim("id", res!.Id),
                     new Claim("username", res.Username),
+                    new Claim("email", res.Email),
+                    new Claim("lastName", res.LastName),
+                    new Claim("firstName", res.FirstName),
                     new Claim("profilePicPath", res.ProfilePicPath ?? "")
                 }, "Cookies");
 
@@ -45,7 +48,12 @@ namespace ApiServer.Controllers {
                     ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
                 });
 
-                return Ok(new LoggedInUserInfo { Id= res.Id, Username = res!.Username });
+                return Ok(new LoggedInUserInfo { 
+                    Id= res.Id, 
+                    Username = res.Username, 
+                    FirstName = res.FirstName, 
+                    LastName = res.LastName 
+                });
             } catch (Exception ex) {
                 return Unauthorized(ex.Message);
             }

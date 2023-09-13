@@ -33,7 +33,7 @@ namespace ApiServer.Repositories {
             await connection.OpenAsync();
 
             using var command = new NpgsqlCommand(
-                "SELECT id, username, passwordHash, profilePicPath FROM users WHERE username = @usernameOrEmail OR email = @usernameOrEmail"
+                "SELECT id, username, email, firstName, lastName, passwordHash, profilePicPath FROM users WHERE username = @usernameOrEmail OR email = @usernameOrEmail"
                 , connection
             );
             command.Parameters.AddWithValue("@usernameOrEmail", user.UsernameOrEmail);
@@ -44,6 +44,9 @@ namespace ApiServer.Repositories {
                     return new LoggedInUserInfo {
                         Id = reader["id"].ToString()!,
                         Username = reader["username"].ToString()!,
+                        Email = reader["email"].ToString()!,
+                        FirstName = reader["firstName"].ToString()!,
+                        LastName = reader["lastName"].ToString()!,
                         ProfilePicPath = reader["profilePicPath"].ToString()
                     };
                 };

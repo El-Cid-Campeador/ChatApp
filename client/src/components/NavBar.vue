@@ -1,7 +1,6 @@
 <template>
     <nav>
-        <router-link :to="{}">Home</router-link>
-        <button @click="logout()">Logout</button>
+        <span @click="logout()" :class="$style.logout">Log out</span>
     </nav>
 </template>
 
@@ -29,3 +28,15 @@
         }
     }
 </script>
+
+<style module>
+    nav {
+        background-color: black;
+        height: 50px;
+    }
+
+    .logout {
+        color: white;
+        cursor: pointer;
+    }
+</style>

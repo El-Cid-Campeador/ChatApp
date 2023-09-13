@@ -8,8 +8,13 @@ const PORT = 9000;
 
 const allowedDomains = ['http://localhost:5173'];
 
-let ID = '';
-let USERNAME = '';
+let userData: User = {
+    id: '',
+    username: '',
+    firstName: '',
+    lastName: '',
+    profilePicPath: ''
+}
 
 const redisClient = createClient();
 
@@ -64,18 +69,15 @@ const io = new Server(httpServer, {
 async function getOnlineUsers() {
     const users = await redisClient.sMembers(`connectedUsers`);
 
-    const res = users.map((user) => JSON.parse(user));
+    const res = users.map((user) => JSON.parse(user)) as User[];
 
     return res;
 }
 
 io.use((socket, next) => {
-    const { id, username } = socket.handshake.auth;
+    userData = socket.handshake.auth as User;
 
-    ID = id;
-    USERNAME = username;
-
-    if (!ID || !USERNAME) {
+    if (!userData) {
         return next(new Error("Not authorized!"));
     }
 
@@ -83,7 +85,7 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    const payload = JSON.stringify({ id: ID, username: USERNAME });
+    const payload = JSON.stringify({ ...userData });
 
     socket.setMaxListeners(0);
 

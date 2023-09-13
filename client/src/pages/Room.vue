@@ -1,14 +1,15 @@
 <template>
-    <div>
+    <div :class="$style.container">
         <div>
             <h1 v-if="isLoading">
                 Loading...
             </h1>
             <div v-else >
+                <h1>{{ name }}</h1>
                 <ul>
                     <template v-for="msg, i in msgList" :key="msg.id" >
                         <li :class="[msg.senderId === senderId ? $style.msg : $style['others-msg'] ]" :title="new Date(msg.date).toLocaleString()">
-                            {{ msg.content }}
+                            <b>{{ msg.content }}</b>
                             <p v-if="i === msgList.length - 1 && isSending">Sending...</p>
                         </li>
                     </template>
@@ -16,28 +17,32 @@
             </div>
         </div>
 
-        <form @submit.prevent="submitMsg()">
-            <input type="text" v-model="inputMsg" />
-        </form>
+        <div :class="$style['input-msg']">
+            <textarea cols="60" rows="5" v-model="inputMsg"></textarea>
+            <button @click="submitMsg()">Send</button>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
     import { inject, onBeforeMount, onMounted, ref } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { useRoute, useRouter } from 'vue-router';
     import axios from 'axios';
     import { Socket } from 'socket.io-client';
 
     const route = useRoute();
+    const router = useRouter();
 
     const roomId = ref(route.params.id);
 
     const isSending = ref(false);
     const inputMsg = ref('');
     const senderId = ref(JSON.parse(localStorage.getItem('data')!).id);
-    const msgList = ref<any[]>([]);
+    const msgList = ref<Message[]>([]);
     const isLoading = ref(false);
     const errorMsg = ref('');
+
+    const name = ref('');
 
     const socket = inject<Socket>('Socket');
 
@@ -63,24 +68,27 @@
         isSending.value = true;
 
         try {
-            const payload = {
-                id: crypto.randomUUID(),
-                senderId: senderId.value,
-                content: inputMsg.value,
-                date: new Date()
+            if (inputMsg.value) {
+                const payload = {
+                    id: crypto.randomUUID(),
+                    senderId: senderId.value,
+                    content: inputMsg.value,
+                    date: new Date()
+                }
+    
+                msgList.value.push({ ...payload });
+    
+                await axios.post(`http://localhost:5057/api/messages/${roomId.value}`, payload, {
+                    withCredentials: true
+                });
+        
+                socket!.emit('from', { msg: payload, roomId: roomId.value });
+        
+                inputMsg.value = '';
+    
+                errorMsg.value = '';
             }
 
-            msgList.value.push({ ...payload });
-
-            await axios.post(`http://localhost:5057/api/messages/${roomId.value}`, payload, {
-                withCredentials: true
-            });
-    
-            socket!.emit('from', { msg: payload, roomId: roomId.value });
-    
-            inputMsg.value = '';
-
-            errorMsg.value = '';
         } catch (error) {
             errorMsg.value = (error as Error).message;
         } finally {
@@ -88,11 +96,17 @@
         }
     }
 
-    socket!.on('to', (msg: any) => {
+    socket!.on('to', (msg: Message) => {
         msgList.value.push(msg);
     });
 
     onBeforeMount(async () => {
+        if (!route.query.name) {
+            router.push({ path: `/home` })
+        }
+
+        name.value = route.query.name as string;
+
         await getMsgs();
     });
 
@@ -102,6 +116,19 @@
 </script>
 
 <style module>
+    .container {
+        overflow-y: auto;
+        padding: 10px;
+        width: 100%;
+        height: 100vh;
+        background-color: rgb(255, 246, 246);
+    }
+
+    textarea {
+        padding: 5px;
+        resize: none;
+        outline: none;
+    }
     .msg, .others-msg {
         border-radius: 10px;
         background-color: #0077ff; 
@@ -114,5 +141,14 @@
 
     .others-msg {
         background-color: #b182ee;
+        margin-left: 50px;
+    }
+
+    .input-msg {
+        display: flex;
+        align-items: flex-end; 
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
     }
 </style>
