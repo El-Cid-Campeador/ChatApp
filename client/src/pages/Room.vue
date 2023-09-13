@@ -5,15 +5,14 @@
                 Loading...
             </h1>
             <div v-else >
-                <ul v-if="errorMsg !== ''">
+                <ul>
                     <template v-for="msg, i in msgList" :key="msg.id" >
-                        <li :class="$style.msg">
-                            {{ msg.content }} {{ msg.senderId }} {{ msg.date }}
+                        <li :class="[msg.senderId === senderId ? $style.msg : $style['others-msg'] ]" :title="new Date(msg.date).toLocaleString()">
+                            {{ msg.content }}
                             <p v-if="i === msgList.length - 1 && isSending">Sending...</p>
                         </li>
                     </template>
                 </ul>
-                <h2 v-else>{{ errorMsg }}</h2>
             </div>
         </div>
 
@@ -68,7 +67,7 @@
                 id: crypto.randomUUID(),
                 senderId: senderId.value,
                 content: inputMsg.value,
-                date: new Date().toISOString()
+                date: new Date()
             }
 
             msgList.value.push({ ...payload });
@@ -103,12 +102,17 @@
 </script>
 
 <style module>
-    .msg {
+    .msg, .others-msg {
         border-radius: 10px;
-        background-color: cyan; 
+        background-color: #0077ff; 
+        color: white;
         padding: 10px;
         margin-top: 20px;
         margin-bottom: 20px;
         width: fit-content;
+    }
+
+    .others-msg {
+        background-color: #b182ee;
     }
 </style>

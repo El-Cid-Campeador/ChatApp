@@ -72,7 +72,7 @@ namespace ApiServer.Repositories {
                     Id=reader["Id"].ToString()!,
                     SenderId=reader["SenderId"].ToString()!,
                     Content=reader["Content"].ToString()!,
-                    Date=reader["date"].ToString()!
+                    Date=reader.GetDateTime(reader.GetOrdinal("date"))
                 };
 
                 messages.Add(message);
@@ -86,7 +86,7 @@ namespace ApiServer.Repositories {
             await connection.OpenAsync();
 
             using var command = new NpgsqlCommand(
-                "INSERT INTO messages (id, senderId, roomId, content, date) VALUES (@id::uuid, @senderId::uuid, @roomId::uuid, @content, to_timestamp(@date, 'YYYY-MM-DDTHH24:MI:SS.MS'))"
+                "INSERT INTO messages (id, senderId, roomId, content, date) VALUES (@id::uuid, @senderId::uuid, @roomId::uuid, @content, @date)"
                 , connection
             );
 

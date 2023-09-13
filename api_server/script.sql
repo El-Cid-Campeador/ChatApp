@@ -5,17 +5,17 @@ CREATE TABLE IF NOT EXISTS users (
     firstName VARCHAR(50) NOT NULL,
     lastName VARCHAR(50) NOT NULL,
     username VARCHAR(20) NOT NULL,
-    email VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL UNIQUE,
     passwordHash TEXT NOT NULL,
     profilePicPath TEXT,
-    createdOn TIMESTAMP NOT NULL DEFAULT NOW(),
-    deletedOn TIMESTAMP
+    createdOn TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deletedOn TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS rooms (
     id UUID PRIMARY KEY,
-    createdOn TIMESTAMP NOT NULL DEFAULT NOW(),
-    deletedOn TIMESTAMP
+    createdOn TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deletedOn TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS messages (
     senderId UUID NOT NULL,
     roomId UUID NOT NULL,
     content TEXT NOT NULL,
-    date TIMESTAMP NOT NULL,
+    date TIMESTAMPTZ NOT NULL,
     FOREIGN KEY (senderId) REFERENCES users(id),
     FOREIGN KEY (roomId) REFERENCES rooms(id)
 );

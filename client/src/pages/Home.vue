@@ -4,7 +4,7 @@
         <ul>
             <template v-for="onlineUser in onlineUsers" :key="onlineUser.id">
                 <li v-show="id !== onlineUser.id">
-                    <div @click="getRoomId(onlineUser.id)" style="cursor: pointer;">{{ onlineUser.id }}</div>
+                    <div @click="getRoomId(onlineUser.id)" style="cursor: pointer;">{{ onlineUser.username }}</div>
                 </li>
             </template>
         </ul>
@@ -26,6 +26,7 @@
     const socket = inject<Socket>('Socket');
 
     const id = ref(JSON.parse(localStorage.getItem('data')!).id);
+    const username = ref(JSON.parse(localStorage.getItem('data')!).username);
 
     async function getRoomId(userId: string) {
         const { data } = await axios.get(`http://localhost:5057/api/rooms?userId0=${id.value}&userId1=${userId}`, {
@@ -44,11 +45,11 @@
     });
 
     onMounted(async () => {
-        socket!.auth = { id: id.value };
+        socket!.auth = { id: id.value, username: username.value };
 
         socket!.connect();
 
-        socket!.emit('join', JSON.stringify({ id: id.value }));
+        socket!.emit('join', JSON.stringify({ id: id.value, username: username.value }));
     });
 </script>
 

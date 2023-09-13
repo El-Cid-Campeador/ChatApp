@@ -9,6 +9,7 @@ const PORT = 9000;
 const allowedDomains = ['http://localhost:5173'];
 
 let ID = '';
+let USERNAME = '';
 
 const redisClient = createClient();
 
@@ -69,9 +70,12 @@ async function getOnlineUsers() {
 }
 
 io.use((socket, next) => {
-    ID = socket.handshake.auth.id;
+    const { id, username } = socket.handshake.auth;
 
-    if (!ID) {
+    ID = id;
+    USERNAME = username;
+
+    if (!ID || !USERNAME) {
         return next(new Error("Not authorized!"));
     }
 
@@ -79,12 +83,12 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    const id = JSON.stringify({ id: ID });
+    const payload = JSON.stringify({ id: ID, username: USERNAME });
 
     socket.setMaxListeners(0);
 
-    socket.on('join', async (userId) => {
-        await redisClient.sAdd(`connectedUsers`, userId);
+    socket.on('join', async (userData) => {
+        await redisClient.sAdd(`connectedUsers`, userData);
 
         const users = await getOnlineUsers();
 
@@ -100,7 +104,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', async () => {
-        await redisClient.sRem(`connectedUsers`, id);
+        await redisClient.sRem(`connectedUsers`, payload);
 
         const users = await getOnlineUsers();
         
@@ -110,4 +114,10 @@ io.on('connection', (socket) => {
 
 httpServer.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`)
+});
+
+process.on('SIGINT', async () => {
+    await redisClient.DEL('connectedUsers');
+
+    process.exit(0);
 });
