@@ -5,8 +5,10 @@ namespace ApiServer.Repositories {
     public class UserRepository : IUserRepository {
         private readonly string _connectionString;
 
-        public UserRepository(){
-            _connectionString = "Host=127.0.0.1;Port=5432;User Id=postgres;Password=root;Database=chat_app_db";
+        public UserRepository(IConfiguration configuration){
+            var conn = configuration.GetConnectionString("PostgresConnection");
+            
+            _connectionString = conn != "" ? conn! : "Host=127.0.0.1;Port=5431;User Id=postgres;Password=root;Database=chat_app_db";
         }
 
         public async Task PostUser(UserSignUpCred user) {

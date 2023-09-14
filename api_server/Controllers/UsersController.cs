@@ -36,8 +36,8 @@ namespace ApiServer.Controllers {
                     new Claim("id", res!.Id),
                     new Claim("username", res.Username),
                     new Claim("email", res.Email),
-                    new Claim("lastName", res.LastName),
                     new Claim("firstName", res.FirstName),
+                    new Claim("lastName", res.LastName),
                     new Claim("profilePicPath", res.ProfilePicPath ?? "")
                 }, "Cookies");
 

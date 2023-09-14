@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
+import "dotenv/config";
 import { createClient } from 'redis';
 
 const PORT = 9000;
@@ -16,7 +17,9 @@ let userData: User = {
     profilePicPath: ''
 }
 
-const redisClient = createClient();
+const redisClient = createClient({
+    url: `redis://${process.env.REDIS_HOST || '127.0.0.1'}:6379`
+});
 
 await redisClient.connect();
 

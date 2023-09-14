@@ -3,9 +3,9 @@
     <div :class="$style.container">
         <ul :class="$style['online-users-container']">
             <template v-for="onlineUser in onlineUsers" :key="onlineUser.id">
-                <li v-show="userData!.id !== onlineUser.id" :class="$style['online-users']">
+                <li v-show="userData!.id !== onlineUser.id" :class="$style['online-users']" @click="getRoomId(onlineUser.id, onlineUser.username)">
                     <img v-show="onlineUser.profilePicPath" :src="onlineUser.profilePicPath" :alt="`${onlineUser.username}'s photo`" />
-                    <div @click="getRoomId(onlineUser.id, onlineUser.username)" :title="`${onlineUser.firstName} ${onlineUser.lastName}`">
+                    <div :title="`${onlineUser.firstName} ${onlineUser.lastName}`">
                         {{ onlineUser.username }}
                     </div>
                 </li>
@@ -18,10 +18,10 @@
 
 <script setup lang="ts">
     import NavBar from '../components/NavBar.vue';
+    import { useRouter } from 'vue-router';
     import { inject, onBeforeMount, onMounted, ref } from 'vue';
     import { Socket } from 'socket.io-client';
-    import axios from 'axios';
-    import { useRouter } from 'vue-router';
+    import { fetcher } from '../functions';
 
     const router = useRouter();
 
@@ -32,7 +32,7 @@
     const socket = inject<Socket>('Socket');
 
     async function getRoomId(userId: string, username: string) {
-        const { data } = await axios.get(`http://localhost:5057/api/rooms?userId0=${userData.value?.id}&userId1=${userId}`, {
+        const { data } = await fetcher.get(`/rooms?userId0=${userData.value?.id}&userId1=${userId}`, {
             withCredentials: true
         });
 

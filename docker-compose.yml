@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+    postgresql:
+        container_name: postgresql
+        image: postgres:16rc1-bullseye
+        environment:
+            - POSTGRES_DB=chat_app_db
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=root
+        ports:
+            - 5431:5432
+        volumes:
+            - ./api_server/script.sql:/docker-entrypoint-initdb.d/script.sql
+            - pg_data:/var/lib/postgresql/data
+        restart: always
+    redis:
+        container_name: redis
+        image: redis:7.2-rc3
+        expose:
+           - 6379
+        volumes: 
+            - redis_data:/data
+        networks:
+            - chat_network
+        restart: always
+    chat_server:
+        container_name: chat_server
+        build: ./chat_server
+        environment:
+            - REDIS_HOST=redis
+        ports:
+            - 9000:9000
+        networks:
+            - chat_network
+        restart: always
+    client:
+        container_name: client
+        depends_on:
+            - postgresql
+            - redis
+            - chat_server
+        build: ./client
+        volumes:
+            - ./client:/usr/src/app/client
+        ports:
+            - 5173:5173
+        restart: always
+        
+volumes:
+    pg_data:
+    redis_data:
+
+networks:
+    chat_network:
+        name: chat_network

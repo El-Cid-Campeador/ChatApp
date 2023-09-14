@@ -25,10 +25,10 @@
 </template>
 
 <script setup lang="ts">
-    import { inject, onBeforeMount, onMounted, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import axios from 'axios';
+    import { inject, onBeforeMount, onMounted, ref } from 'vue';
     import { Socket } from 'socket.io-client';
+    import { fetcher } from '../functions';
 
     const route = useRoute();
     const router = useRouter();
@@ -50,7 +50,7 @@
         isLoading.value = true;
 
         try {
-            const { data } = await axios.get(`http://localhost:5057/api/messages/${roomId.value}`, {
+            const { data } = await fetcher.get(`/messages/${roomId.value}`, {
                 withCredentials: true
             });
 
@@ -78,7 +78,7 @@
     
                 msgList.value.push({ ...payload });
     
-                await axios.post(`http://localhost:5057/api/messages/${roomId.value}`, payload, {
+                await fetcher.post(`/messages/${roomId.value}`, payload, {
                     withCredentials: true
                 });
         
@@ -123,12 +123,7 @@
         height: 100vh;
         background-color: rgb(255, 246, 246);
     }
-
-    textarea {
-        padding: 5px;
-        resize: none;
-        outline: none;
-    }
+    
     .msg, .others-msg {
         border-radius: 10px;
         background-color: #0077ff; 

@@ -25,9 +25,9 @@
 </template>
 
 <script setup lang="ts">
-    import axios from 'axios';
-    import { ref } from 'vue';
     import { useRouter } from 'vue-router';
+    import { ref } from 'vue';
+    import { fetcher } from '../functions';
     
     const router = useRouter(); 
 
@@ -36,14 +36,15 @@
     const userName = ref('');
     const email = ref('');
     const password = ref('');
+    
     const isPasswordShowing = ref(false);
     const errorMsg = ref('');
 
     async function handleSubmit() {
         try {
-            await axios.post(`http://localhost:5057/api/signup`, {
+            await fetcher.post(`/signup`, {
                 firstName: firstName.value,
-                lastName: firstName.value,
+                lastName: lastName.value,
                 userName: userName.value,
                 email: email.value,
                 password: password.value

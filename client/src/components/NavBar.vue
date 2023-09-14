@@ -5,10 +5,12 @@
 </template>
 
 <script setup lang="ts">
-    import axios from 'axios';
+    import { useRouter } from 'vue-router';
     import { inject, ref } from 'vue';
-    import router from '../router';
     import { Socket } from 'socket.io-client';
+    import { fetcher } from '../functions';
+
+    const router = useRouter();
 
     const errorMsg = ref('');
 
@@ -18,9 +20,9 @@
         try {
             socket!.disconnect();
 
-            await axios.delete(`http://localhost:5057/api/logout`, {
-                withCredentials: true
-            });
+            localStorage.setItem('data', '');
+
+            await fetcher.delete(`http://localhost:5057/api/logout`);
 
             router.push({ path: '/' });
         } catch (error) {
@@ -30,11 +32,6 @@
 </script>
 
 <style module>
-    nav {
-        background-color: black;
-        height: 50px;
-    }
-
     .logout {
         color: white;
         cursor: pointer;

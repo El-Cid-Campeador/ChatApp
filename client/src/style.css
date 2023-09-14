@@ -4,6 +4,17 @@
     padding: 0;
 }
 
+nav {
+    background-color: black;
+    height: 50px;
+}
+
 li {
     list-style: none;
+}
+
+textarea {
+    padding: 5px;
+    resize: none;
+    outline: none;
 }

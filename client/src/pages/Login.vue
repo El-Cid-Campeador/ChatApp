@@ -17,20 +17,21 @@
 </template>
 
 <script setup lang="ts">
-    import axios from 'axios';
-    import { ref } from 'vue';
     import { useRouter } from 'vue-router';
+    import { ref } from 'vue';
+    import { fetcher } from '../functions';
 
     const router = useRouter(); 
 
     const usernameInput = ref('');
     const passwordInput = ref('');
+    
     const isPasswordShowing = ref(false);
     const errorMsg = ref('');
 
     async function handleSubmit() {
         try {
-            const { data } = await axios.post(`http://localhost:5057/api/login`, {
+            const { data } = await fetcher.post(`/login`, {
                 usernameOrEmail: usernameInput.value,
                 password: passwordInput.value
             }, {
