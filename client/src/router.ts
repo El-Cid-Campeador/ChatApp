@@ -39,14 +39,4 @@ const router = createRouter({
     routes
 });
 
-const isAuthenticated = true;
-
-const arr = ['Login', 'SignUp'];
-
-router.beforeEach((to) => {
-    if (!isAuthenticated && !arr.includes(String(to.name))) {
-        return { name: 'Login' };
-    }
-});
-
 export default router;

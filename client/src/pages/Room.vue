@@ -5,19 +5,22 @@
                 Loading...
             </h1>
             <div v-else >
-                <h1>{{ name }}</h1>
-                <ul>
-                    <template v-for="msg, i in msgList" :key="msg.id" >
-                        <li :class="[msg.senderId === senderId ? $style.msg : $style['others-msg'] ]" :title="new Date(msg.date).toLocaleString()">
-                            <b>{{ msg.content }}</b>
-                            <p v-if="i === msgList.length - 1 && isSending">Sending...</p>
-                        </li>
-                    </template>
-                </ul>
+                <h2 v-if="errorGetMsgs" >{{ errorGetMsgs }}</h2>
+                <div v-else>
+                    <h1>{{ name }}</h1>
+                    <ul>
+                        <template v-for="msg, i in msgList" :key="msg.id" >
+                            <li :class="[msg.senderId === senderId ? $style.msg : $style['others-msg'] ]" :title="new Date(msg.date).toLocaleString()">
+                                <b>{{ msg.content }}</b>
+                                <p v-if="i === msgList.length - 1 && isSending">{{ sendingState }}</p>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <div :class="$style['input-msg']">
+        <div v-show="!errorGetMsgs" :class="$style['input-msg']">
             <textarea cols="60" rows="5" v-model="inputMsg"></textarea>
             <button @click="submitMsg()">Send</button>
         </div>
@@ -39,9 +42,9 @@
     const inputMsg = ref('');
     const senderId = ref(JSON.parse(localStorage.getItem('data')!).id);
     const msgList = ref<Message[]>([]);
+    const errorGetMsgs = ref('');
     const isLoading = ref(false);
-    const errorMsg = ref('');
-
+    const sendingState = ref('');
     const name = ref('');
 
     const socket = inject<Socket>('Socket');
@@ -50,51 +53,52 @@
         isLoading.value = true;
 
         try {
-            const { data } = await fetcher.get(`/messages/${roomId.value}`, {
-                withCredentials: true
-            });
-
-            errorMsg.value = '';
-
+            const { data } = await fetcher.get(`/messages/${roomId.value}`);
+            
             msgList.value = data;
-        } catch (error) {
-            errorMsg.value = (error as Error).message;
+
+            errorGetMsgs.value = '';
+        } catch (err) {
+            errorGetMsgs.value = (err as Error).message;
         } finally {
             isLoading.value = false;
         }
     }
 
     async function submitMsg() {
+        if (!inputMsg.value) {
+            return;
+        }
+
         isSending.value = true;
 
-        try {
-            if (inputMsg.value) {
-                const payload = {
-                    id: crypto.randomUUID(),
-                    senderId: senderId.value,
-                    content: inputMsg.value,
-                    date: new Date()
-                }
-    
-                msgList.value.push({ ...payload });
-    
-                await fetcher.post(`/messages/${roomId.value}`, payload, {
-                    withCredentials: true
-                });
-        
-                socket!.emit('from', { msg: payload, roomId: roomId.value });
-        
-                inputMsg.value = '';
-    
-                errorMsg.value = '';
-            }
+        sendingState.value = 'Sending...';
 
-        } catch (error) {
-            errorMsg.value = (error as Error).message;
+        const payload = {
+            id: crypto.randomUUID(),
+            senderId: senderId.value,
+            content: inputMsg.value,
+            date: new Date()
+        }
+
+        msgList.value.push({ ...payload });
+
+        try {
+            await fetcher.post(`/messages/${roomId.value}`, payload);
+    
+            socket!.emit('from', { msg: payload, roomId: roomId.value });
+        } catch (err) {
+            sendingState.value = 'Not sent!';
         } finally {
             isSending.value = false;
         }
     }
+
+    socket!.on("connect_error", (err) => {
+        console.log(err);
+        
+        router.push({ path: `/` });
+    });
 
     socket!.on('to', (msg: Message) => {
         msgList.value.push(msg);

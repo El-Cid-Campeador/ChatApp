@@ -32,15 +32,19 @@
     const socket = inject<Socket>('Socket');
 
     async function getRoomId(userId: string, username: string) {
-        const { data } = await fetcher.get(`/rooms?userId0=${userData.value?.id}&userId1=${userId}`, {
-            withCredentials: true
-        });
-
-        router.push({ path: `/home/room/${data.result}`, query: { name: username } });
+        try {
+            const { data } = await fetcher.get(`/rooms?userId0=${userData.value?.id}&userId1=${userId}`);
+    
+            router.push({ path: `/home/room/${data.result}`, query: { name: username } });
+        } catch (err) {
+            router.push({ path: `/` });
+        }
     }
 
     socket!.on("connect_error", (err) => {
-        console.log(err.message);
+        console.log(err);
+        
+        router.push({ path: `/` });
     });
 
     socket!.on('getAllUsers', (users: OnlineUser[]) => {

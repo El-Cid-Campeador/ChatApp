@@ -34,8 +34,6 @@
             const { data } = await fetcher.post(`/login`, {
                 usernameOrEmail: usernameInput.value,
                 password: passwordInput.value
-            }, {
-                withCredentials: true
             }) as { data: UserData };
 
             localStorage.setItem('data', JSON.stringify({ ...data }));            
