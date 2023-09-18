@@ -1,19 +1,23 @@
 <template>
-    <form @submit.prevent="handleSubmit()">
-        <div>
-            <input type="text" v-model="usernameInput" placeholder="Username" required />
-        </div>
-        <div>
-            <input :type="isPasswordShowing ? 'text' : 'password' " v-model="passwordInput" placeholder="Password" required />
-            <button type="button" @click="isPasswordShowing = !isPasswordShowing">
-                <span v-if="isPasswordShowing">Hide password</span>
-                <span v-else>Show password</span>
-            </button>
-        </div>
-        <input type="submit" value="Login" />
-    </form>
-    <h1 v-show="errorMsg !== ''"></h1>
-    <router-link :to="{ name: 'SignUp' }">Sign Up</router-link>
+    <div class="container">
+        <form @submit.prevent="handleSubmit()">
+            <div>
+                <input type="text" v-model="usernameInput" placeholder="Username" required />
+            </div>
+            <div>
+                <input :type="isPasswordShowing ? 'text' : 'password' " v-model="passwordInput" placeholder="Password" required />
+                <button type="button" @click="isPasswordShowing = !isPasswordShowing">
+                    <span v-if="isPasswordShowing">Hide password</span>
+                    <span v-else>Show password</span>
+                </button>
+            </div>
+            <input type="submit" value="Login" />
+        </form>
+    
+        <h1 v-show="errorMsg">{{ errorMsg }}</h1>
+    
+        <router-link :to="{ name: 'SignUp' }">Sign Up</router-link>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -41,8 +45,14 @@
             errorMsg.value = '';
 
             router.push({ path: '/home' });
-        } catch (error) {
-            errorMsg.value = (error as Error).message;
+        } catch (err) {
+            errorMsg.value = 'Invalid credentials!';
         }
     }
 </script>
+
+<style scoped>
+    h1 {
+        color: red;
+    }
+</style>

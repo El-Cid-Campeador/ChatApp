@@ -1,18 +1,16 @@
 <template>
     <NavBar />
-    <div :class="$style.container">
+    <div>
         <ul :class="$style['online-users-container']">
             <template v-for="onlineUser in onlineUsers" :key="onlineUser.id">
-                <li v-show="userData!.id !== onlineUser.id" :class="$style['online-users']" @click="getRoomId(onlineUser.id, onlineUser.username)">
+                <li v-show="userData!.id !== onlineUser.id" :class="$style['online-user']" @click="getRoomId(onlineUser.id, onlineUser.username)">
                     <img v-show="onlineUser.profilePicPath" :src="onlineUser.profilePicPath" :alt="`${onlineUser.username}'s photo`" />
-                    <div :title="`${onlineUser.firstName} ${onlineUser.lastName}`">
-                        {{ onlineUser.username }}
+                    <div style="display: flex; align-items: center;">
+                        <h1 style="margin-right: 5px;">{{ onlineUser.username }}</h1> (<i>{{ `${onlineUser.firstName} ${onlineUser.lastName}` }}</i>)
                     </div>
                 </li>
             </template>
         </ul>
-
-        <router-view :key="Date.now()" />
     </div>
 </template>
 
@@ -35,7 +33,7 @@
         try {
             const { data } = await fetcher.get(`/rooms?userId0=${userData.value?.id}&userId1=${userId}`);
     
-            router.push({ path: `/home/room/${data.result}`, query: { name: username } });
+            router.push({ path: `/room/${data.result}`, query: { name: username } });
         } catch (err) {
             router.push({ path: `/` });
         }
@@ -52,33 +50,44 @@
     });
 
     onBeforeMount(() => {
-        userData.value = JSON.parse(localStorage.getItem('data')!);
+        try {
+            
+            userData.value = JSON.parse(localStorage.getItem('data')!);
+        } catch (error) {
+            router.push({ path: `/` });
+        }
     });
 
     onMounted(async () => {
-        socket!.auth = userData.value!;
-
-        socket!.connect();
-
-        socket!.emit('join', JSON.stringify({ ...userData.value }));
+        try {
+            socket!.auth = userData.value!;
+    
+            socket!.connect();
+    
+            socket!.emit('join', JSON.stringify({ ...userData.value }));
+        } catch (error) {
+            router.push({ path: `/` });
+        }
     });
 </script>
 
 <style module>
-    .container {
-        display: grid;
-        grid-template-columns: repeat(2, 50%);
-    }
-
     .online-users-container {
         margin: 10px;
     }
 
-    .online-users {
+    .online-user {
+        width: 50%;
         border-radius: 20px;
         background-color: #eee;
         cursor: pointer;
         padding: 10px;
         margin-bottom: 10px;
+    }
+
+    @media screen and (width <= 320px) {
+        .online-user {
+            width: 95%;
+        }
     }
 </style>

@@ -19,14 +19,12 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/home',
         name: 'Home',
-        component: Home, 
-        children: [
-            {
-                path: 'room/:id',
-                name: 'Room',
-                component: Room
-            }
-        ]
+        component: Home
+    },
+    {
+        path: '/room/:id',
+        name: 'Room',
+        component: Room
     },
     {
         path: "/:catchAll(.*)",

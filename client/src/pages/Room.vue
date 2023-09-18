@@ -1,12 +1,13 @@
 <template>
-    <div :class="$style.container">
+    <NavBar />
+    <div class="container">
         <div>
             <h1 v-if="isLoading">
                 Loading...
             </h1>
             <div v-else >
                 <h2 v-if="errorGetMsgs" >{{ errorGetMsgs }}</h2>
-                <div v-else>
+                <div v-else :class="$style['msgs-container']">
                     <h1>{{ name }}</h1>
                     <ul>
                         <template v-for="msg, i in msgList" :key="msg.id" >
@@ -21,7 +22,7 @@
         </div>
 
         <div v-show="!errorGetMsgs" :class="$style['input-msg']">
-            <textarea cols="60" rows="5" v-model="inputMsg"></textarea>
+            <textarea v-model="inputMsg"></textarea>
             <button @click="submitMsg()">Send</button>
         </div>
     </div>
@@ -32,6 +33,7 @@
     import { inject, onBeforeMount, onMounted, ref } from 'vue';
     import { Socket } from 'socket.io-client';
     import { fetcher } from '../functions';
+    import NavBar from '../components/NavBar.vue';
 
     const route = useRoute();
     const router = useRouter();
@@ -40,7 +42,7 @@
 
     const isSending = ref(false);
     const inputMsg = ref('');
-    const senderId = ref(JSON.parse(localStorage.getItem('data')!).id);
+    const senderId = ref<string>(JSON.parse(localStorage.getItem('data')!).id);
     const msgList = ref<Message[]>([]);
     const errorGetMsgs = ref('');
     const isLoading = ref(false);
@@ -86,12 +88,18 @@
         try {
             await fetcher.post(`/messages/${roomId.value}`, payload);
     
+            inputMsg.value = '';
+
             socket!.emit('from', { msg: payload, roomId: roomId.value });
         } catch (err) {
             sendingState.value = 'Not sent!';
         } finally {
             isSending.value = false;
         }
+    }
+
+    function playSoundNotification() {
+        new Audio('../../chat.mp3').play();
     }
 
     socket!.on("connect_error", (err) => {
@@ -101,6 +109,12 @@
     });
 
     socket!.on('to', (msg: Message) => {
+        console.log(msg.senderId);
+        
+        if (msg.senderId !== senderId.value) {
+            playSoundNotification();
+        }
+
         msgList.value.push(msg);
     });
 
@@ -120,12 +134,9 @@
 </script>
 
 <style module>
-    .container {
+    .msgs-container {
         overflow-y: auto;
-        padding: 10px;
-        width: 100%;
-        height: 100vh;
-        background-color: rgb(255, 246, 246);
+        margin-bottom: 70px;
     }
     
     .msg, .others-msg {
@@ -136,6 +147,8 @@
         margin-top: 20px;
         margin-bottom: 20px;
         width: fit-content;
+        overflow-wrap: break-word;
+        max-width: 300px;
     }
 
     .others-msg {
@@ -147,7 +160,17 @@
         display: flex;
         align-items: flex-end; 
         position: fixed;
-        right: 20px;
-        bottom: 20px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+        margin-top: 100px;
+        padding: 10px;
+    }
+
+    @media screen and (width <= 320px) {
+        .msg, .others-msg {
+            max-width: 200px;
+        }
     }
 </style>

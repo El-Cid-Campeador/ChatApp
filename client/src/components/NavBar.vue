@@ -1,5 +1,6 @@
 <template>
     <nav>
+        <router-link :to="{ name: 'Home' }">Home</router-link>
         <span @click="logout()" :class="$style.logout">Log out</span>
     </nav>
 </template>

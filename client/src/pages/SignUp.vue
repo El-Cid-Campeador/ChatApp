@@ -1,27 +1,32 @@
 <template>
-    <form @submit.prevent="handleSubmit()">
-        <div>
-            <input type="text" v-model="firstName" placeholder="First Name" required />
-        </div>
-        <div>
-            <input type="text" v-model="lastName" placeholder="Last Name" required />
-        </div>
-        <div>
-            <input type="text" v-model="userName" placeholder="Username" required />
-        </div>
-        <div>
-            <input type="email" v-model="email" placeholder="Email" required />
-        </div>
-        <div>
-            <input :type="isPasswordShowing ? 'text' : 'password' " v-model="password" placeholder="Password" required />
-            <button type="button" @click="isPasswordShowing = !isPasswordShowing">
-                <span v-if="isPasswordShowing">Hide password</span>
-                <span v-else>Show password</span>
-            </button>
-        </div>
-        <input type="submit" value="Sign Up" />
-    </form>
-    <h1 v-show="errorMsg !== ''"></h1>
+    <div class="container">
+        <form @submit.prevent="handleSubmit()">
+            <div>
+                <input type="text" v-model="firstName" placeholder="First Name" required />
+            </div>
+            <div>
+                <input type="text" v-model="lastName" placeholder="Last Name" required />
+            </div>
+            <div>
+                <input type="text" v-model="userName" placeholder="Username" required />
+            </div>
+            <div>
+                <input type="email" v-model="email" placeholder="Email" required />
+            </div>
+            <div>
+                <input :type="isPasswordShowing ? 'text' : 'password' " v-model="password" placeholder="Password" required />
+                <button type="button" @click="isPasswordShowing = !isPasswordShowing">
+                    <span v-if="isPasswordShowing">Hide password</span>
+                    <span v-else>Show password</span>
+                </button>
+            </div>
+            <input type="submit" value="Sign Up" />
+        </form>
+    
+        <h1 v-show="errorMsg"></h1>
+
+        <router-link :to="{ name: 'Login' }">Sign In</router-link>
+    </div>
 </template>
 
 <script setup lang="ts">
