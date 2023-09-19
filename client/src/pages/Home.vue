@@ -68,6 +68,8 @@
         } catch (error) {
             router.push({ path: `/` });
         }
+
+        console.clear();
     });
 </script>
 

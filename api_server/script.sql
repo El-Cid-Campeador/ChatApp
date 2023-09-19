@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID DEFAULT uuid_generate_v4 () PRIMARY KEY,
     firstName VARCHAR(50) NOT NULL,
     lastName VARCHAR(50) NOT NULL,
-    username VARCHAR(20) NOT NULL,
+    username VARCHAR(20) NOT NULL UNIQUE,
     email VARCHAR(50) NOT NULL UNIQUE,
     passwordHash TEXT NOT NULL,
     profilePicPath TEXT,

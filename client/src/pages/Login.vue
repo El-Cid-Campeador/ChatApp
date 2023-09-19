@@ -2,10 +2,10 @@
     <div class="container">
         <form @submit.prevent="handleSubmit()">
             <div>
-                <input type="text" v-model="usernameInput" placeholder="Username" required />
+                <input type="text" v-model="usernameInput" placeholder="Username" minlength="8" maxlength="50" required />
             </div>
             <div>
-                <input :type="isPasswordShowing ? 'text' : 'password' " v-model="passwordInput" placeholder="Password" required />
+                <input :type="isPasswordShowing ? 'text' : 'password' " v-model="passwordInput" placeholder="Password" minlength="8" maxlength="64" required />
                 <button type="button" @click="isPasswordShowing = !isPasswordShowing">
                     <span v-if="isPasswordShowing">Hide password</span>
                     <span v-else>Show password</span>
@@ -23,7 +23,7 @@
 <script setup lang="ts">
     import { useRouter } from 'vue-router';
     import { ref } from 'vue';
-    import { fetcher } from '../functions';
+    import { fetcher, isAnyOfTheAttributesAnEmptyString } from '../functions';
 
     const router = useRouter(); 
 
@@ -35,10 +35,19 @@
 
     async function handleSubmit() {
         try {
-            const { data } = await fetcher.post(`/login`, {
+            const payload = {
                 usernameOrEmail: usernameInput.value,
                 password: passwordInput.value
-            }) as { data: UserData };
+            };
+
+            if (isAnyOfTheAttributesAnEmptyString(payload) ||
+                payload.usernameOrEmail.length < 8 || payload.usernameOrEmail.length > 50 ||
+                payload.password.length < 8 || payload.password.length > 64
+            ) {
+                throw new Error('Invalid credentials!');
+            }
+
+            const { data } = await fetcher.post(`/login`, payload) as { data: UserData };
 
             localStorage.setItem('data', JSON.stringify({ ...data }));            
             
@@ -46,12 +55,22 @@
 
             router.push({ path: '/home' });
         } catch (err) {
-            errorMsg.value = 'Invalid credentials!';
+            const error = (err as Error).message;
+
+            if (error !== 'Invalid credentials!') {
+                errorMsg.value = 'Incorrect credentials! Try again!';
+            } else {
+                errorMsg.value = error;
+            }
         }
     }
 </script>
 
 <style scoped>
+    a {
+        color: cornflowerblue;
+    }
+    
     h1 {
         color: red;
     }

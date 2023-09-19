@@ -5,4 +5,16 @@ const fetcher = axios.create({
     withCredentials: true
 });
 
-export { fetcher };
+function isAnyOfTheAttributesAnEmptyString(obj: any) {
+    for (const key in obj) {
+        if (typeof obj[key] === 'string') {
+            if (obj[key] === '') {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+export { fetcher, isAnyOfTheAttributesAnEmptyString };
