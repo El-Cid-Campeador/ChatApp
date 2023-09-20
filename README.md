@@ -9,6 +9,9 @@
 $ git clone https://github.com/El-Cid-Campeador/ChatApp && cd ChatApp
 $ cd api_server
 $ dotnet restore && dotnet watch --no-hot-reload
+```
+
+```bash
 $ cd api_server.Tests && dotnet restore
 $ cd ../chat_server && npm i
 $ cd ../client && npm i
