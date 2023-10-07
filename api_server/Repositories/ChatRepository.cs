@@ -2,7 +2,7 @@ using ApiServer.Data.Entities;
 using Npgsql;
 
 namespace ApiServer.Repositories {
-    public class ChatRepository : IChatRepository {
+    public class ChatRepository {
         private readonly string _connectionString;
 
         public ChatRepository(IConfiguration configuration){
@@ -83,7 +83,7 @@ namespace ApiServer.Repositories {
             return messages;
         }
 
-        public async Task AddMessage(string roomId, Message message) {
+        public async Task PostMessage(string roomId, Message message) {
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 

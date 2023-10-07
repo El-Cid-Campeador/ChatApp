@@ -1,6 +1,5 @@
 using System.Text.Json;
 using ApiServer.Repositories;
-using ApiServer.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,11 +40,8 @@ builder.Services.AddControllers().AddJsonOptions(options => {
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<UserService>();
-
-builder.Services.AddScoped<IChatRepository, ChatRepository>();
-builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ChatRepository>();
 
 var app = builder.Build();
 

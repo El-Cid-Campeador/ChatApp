@@ -1,5 +1,4 @@
 using ApiServer.Repositories;
-using ApiServer.Services;
 using Microsoft.Extensions.Configuration;
 
 namespace api_server.Tests {
@@ -13,11 +12,10 @@ namespace api_server.Tests {
             var configuration = new ConfigurationBuilder().AddInMemoryCollection(dbConfig).Build();
 
             var chatRepository = new ChatRepository(configuration);
-            var chatService = new ChatService(chatRepository);
 
-            var res = await chatService.GetRoomId("dbf09d26-6251-445f-b349-8d9560e0ab10", "6d7b6703-0e2d-474b-811f-602572dee1dc");
+            var res = await chatRepository.GetRoomId("17a482f4-3022-417f-80cb-9cb994403866", "6b05a96a-2b2e-435c-9c52-76bb6ed98f53");
 
-            Assert.Equal("17dfc230-ef6b-4ed5-a478-42a238b8349c", res);
+            Assert.Equal("d44d1757-11d0-4074-af56-eed13e46bb92", res);
         }
     }
 }

@@ -1,47 +1,50 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using ApiServer.Services;
 using ApiServer.Data.Entities;
+using ApiServer.Repositories;
 
 namespace ApiServer.Controllers {
     [Authorize]
     [ApiController]
+    [Route("api/messages")]
     public class ChatController : ControllerBase {
-        private readonly ChatService _chatService;
+        private readonly ChatRepository _chatRepository;
     
-        public ChatController(ChatService chatService) {
-            _chatService = chatService;
+        public ChatController(ChatRepository chatRepository) {
+            _chatRepository = chatRepository;
         }
 
-        [HttpGet("api/rooms")]
+        [HttpGet("/api/rooms")]
         public async Task<IActionResult> GetRoomId(string userId0, string userId1) {
-            try {
-                return Ok(new {
-                    Result = await _chatService.GetRoomId(userId0, userId1)
-                });
-            } catch (Exception ex) {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+            string result;
+            var id = await _chatRepository.GetRoomId(userId0, userId1);
+
+            if (id == null) {
+                var roomId = await _chatRepository.CreateRoom();
+
+                await _chatRepository.AddChat(roomId, userId0);
+                await _chatRepository.AddChat(roomId, userId1);
+
+                result = roomId;
+            } else {
+                result = id;
             }
+
+            return Ok(new {
+                Result = result
+            });
         }
         
-        [HttpGet("api/messages/{roomId}")]
+        [HttpGet("{roomId}")]
         public async Task<IActionResult> GetMessages(string roomId) {
-            try {
-                return Ok(await _chatService.GetMessages(roomId));
-            } catch (Exception ex) {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            return Ok(await _chatRepository.GetMessagesByRoomId(roomId));
         }
 
-        [HttpPost("api/messages/{roomId}")]
+        [HttpPost("{roomId}")]
         public async Task<IActionResult> PostMessage(string roomId, Message message) {
-            try {
-               await _chatService.PostMessage(roomId, message);
+            await _chatRepository.PostMessage(roomId, message);
 
-                return Ok();
-            } catch (Exception ex) {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            return Ok();
         }
     }
 }

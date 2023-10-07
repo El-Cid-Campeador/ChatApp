@@ -3,72 +3,62 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using ApiServer.Data;
-using ApiServer.Services;
+using ApiServer.Repositories;
 
 namespace ApiServer.Controllers {
     [ApiController]
-    [Route("/api/users")]
+    [Route("api")]
     public class UsersController : ControllerBase {
-        private readonly UserService _userService;
-        public UsersController(UserService userService) {
-            _userService = userService;
+        private readonly UserRepository _userRepository;
+        public UsersController(UserRepository userRepository) {
+            _userRepository = userRepository;
         }
 
-        [HttpPost("/api/signup")]
+        [HttpPost("signup")]
         public async Task<IActionResult> SignUp(UserSignUpCred user) {
-            try {
-                await _userService.AddUser(user);
+            await _userRepository.PostUser(user);
 
-                return Ok();
-            } catch (Exception ex) {
-                 Console.WriteLine(ex.Message);
-                 
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            return Ok();
         }
 
-        [HttpPost("/api/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(UserSignInCred user) {
-            try {
-                var res = await _userService.CheckCredentials(user);
+            var res = await _userRepository.FindUser(user);
 
-                var claimsIdentity = new ClaimsIdentity(new[] {
-                    new Claim("id", res!.Id),
-                    new Claim("username", res.Username),
-                    new Claim("email", res.Email),
-                    new Claim("firstName", res.FirstName),
-                    new Claim("lastName", res.LastName),
-                    new Claim("profilePicPath", res.ProfilePicPath ?? "")
-                }, "Cookies");
-
-                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-                await Request.HttpContext.SignInAsync("Cookies", claimsPrincipal,  new AuthenticationProperties {
-                    IsPersistent = true,
-                    ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
-                });
-
-                return Ok(new LoggedInUserInfo { 
-                    Id= res.Id, 
-                    Username = res.Username, 
-                    FirstName = res.FirstName, 
-                    LastName = res.LastName 
-                });
-            } catch (Exception ex) {
-                return Unauthorized(ex.Message);
+            if (res == null) {
+                return Unauthorized();
             }
+
+            var claimsIdentity = new ClaimsIdentity(new[] {
+                new Claim("id", res!.Id),
+                new Claim("username", res.Username),
+                new Claim("email", res.Email),
+                new Claim("firstName", res.FirstName),
+                new Claim("lastName", res.LastName),
+                new Claim("profilePicPath", res.ProfilePicPath ?? "")
+            }, "Cookies");
+
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            await Request.HttpContext.SignInAsync("Cookies", claimsPrincipal,  new AuthenticationProperties {
+                IsPersistent = true,
+                ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
+            });
+
+            return Ok(new LoggedInUserInfo { 
+                Id= res.Id, 
+                Username = res.Username, 
+                FirstName = res.FirstName, 
+                LastName = res.LastName 
+            });
         }
 
         [Authorize]
-        [HttpDelete("/api/logout")]
+        [HttpDelete("logout")]
         public async Task<IActionResult> Logout() {
-            try {
-                await HttpContext.SignOutAsync();
+            await HttpContext.SignOutAsync();
 
-                return Ok();
-            } catch (Exception ex) {
-                return StatusCode(500, ex.Message);
-            }
+            return Ok();
         }
     }
 }

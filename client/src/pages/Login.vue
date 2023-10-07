@@ -2,7 +2,7 @@
     <div class="container">
         <form @submit.prevent="handleSubmit()">
             <div>
-                <input type="text" v-model="usernameInput" placeholder="Username" minlength="8" maxlength="50" required />
+                <input type="text" v-model="usernameInput" placeholder="Username or Email" minlength="8" maxlength="50" required />
             </div>
             <div>
                 <input :type="isPasswordShowing ? 'text' : 'password' " v-model="passwordInput" placeholder="Password" minlength="8" maxlength="64" required />

@@ -2,7 +2,7 @@ using ApiServer.Data;
 using Npgsql;
 
 namespace ApiServer.Repositories {
-    public class UserRepository : IUserRepository {
+    public class UserRepository {
         private readonly string _connectionString;
 
         public UserRepository(IConfiguration configuration){
